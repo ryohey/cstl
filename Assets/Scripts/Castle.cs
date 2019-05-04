@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
-using PropertyCode = System.Collections.Generic.KeyValuePair<string, string>;
+using System;
 
 public struct Tree<T>
 {
@@ -17,41 +16,175 @@ public struct Tag
     public Dictionary<string, string> attributes;
 }
 
-public struct TagCode
+public interface CodeGeneratable
 {
-
+    string Generate();
 }
 
-public interface IComponentCode
+public enum AccessibilityCode
 {
-    string ClassName { get; }
-    PropertyCode[] Properties { get; }
+    Public, Private, Protected, Internal
 }
 
-public interface IContainerCode: IComponentCode
+public static class CodeUtils
 {
-    IComponentCode[] Children { get; }
+    public static string Generate(this AccessibilityCode self)
+    {
+        switch (self)
+        {
+            case AccessibilityCode.Internal:
+                return "internal";
+            case AccessibilityCode.Private:
+                return "private";
+            case AccessibilityCode.Protected:
+                return "protected";
+            case AccessibilityCode.Public:
+                return "public";
+        }
+        return "";
+    }
+
+    public static string Lines(string[] lines, int numberOfNewlines = 1)
+    {
+        var newline = string.Concat(Enumerable.Repeat(Environment.NewLine, numberOfNewlines));
+        return string.Join(newline, lines);
+    }
+
+    public static string Lines(int numberOfNewlines, params string[] lines)
+    {
+        return Lines(lines, numberOfNewlines);
+    }
+
+    public static string Lines(params string[] lines)
+    {
+        return Lines(1, lines);
+    }
+
+    public static string Indent(string text, string indentString = "    ", int level = 1)
+    {
+        var indent = string.Concat(Enumerable.Repeat(indentString, level));
+        var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        return Lines(lines.Select(line => indent + line).ToArray());
+    }
+
+    public static string Block(string text)
+    {
+        return Lines("{", Indent(text), "}");
+    }
 }
 
-public struct ClassCode: IComponentCode
+public struct PropertyCode: CodeGeneratable
 {
-    public string className;
-    public string ClassName => className;
+    public string name;
+    public string type;
+    public string value;
+    public AccessibilityCode accessibility;
 
+    public string Generate()
+    {
+        return $"{accessibility.Generate()} {type} {name} = {value};";
+    }
+}
+
+public struct ArgumentCode: CodeGeneratable
+{
+    public string name;
+    public string type;
+    public string defaultValue;
+
+    public string Generate()
+    {
+        return $"{type} {name} = {defaultValue}";
+    }
+}
+
+public struct MethodCode: CodeGeneratable
+{
+    public string name;
+    public string returnType;
+    public ArgumentCode[] arguments;
+    public AccessibilityCode accessibility;
+    public string body;
+
+    public string Generate()
+    {
+        var args = string.Join(", ", arguments.Select(arg => arg.Generate()));
+        return CodeUtils.Lines(
+            $"{accessibility.Generate()} {returnType} {name}({args})",
+            CodeUtils.Block(body)
+        );
+    }
+}
+
+public struct ClassCode: CodeGeneratable
+{
+    public string name;
+    public string baseClassName;
+    public AccessibilityCode accessibility;
     public PropertyCode[] properties;
-    public PropertyCode[] Properties => properties;
+    public MethodCode[] methods;
+
+    public string Generate()
+    {
+        var propString = CodeUtils.Lines(properties.Select(prop => prop.Generate()).ToArray());
+        var methodString = CodeUtils.Lines(methods.Select(method => method.Generate()).ToArray(), 2);
+
+        return CodeUtils.Lines(
+            $"{accessibility.Generate()} class {name}: {baseClassName}",
+            CodeUtils.Block(CodeUtils.Lines(2, propString, methodString))
+        );
+    }
 }
 
-public struct ContainerCode: IContainerCode
+public struct MonoBehaviourCode : CodeGeneratable
 {
-    public string className;
-    public string ClassName => className;
+    public string name;
+    public Tag[] components;
 
-    public PropertyCode[] properties;
-    public PropertyCode[] Properties => properties;
+    public string Generate()
+    {
+        int generatePropCount = 0;
+        string GeneratePropName()
+        {
+            return $"__Prop{generatePropCount++}";
+        }
 
-    public IComponentCode[] children;
-    public IComponentCode[] Children => children;
+        string GenerateAddComponentCode(Tag tag, string propName)
+        {
+            var add = $"{propName} = gameObject.AddComponent<{tag.tagName}>();";
+            var attrs = tag.attributes.Select(attr => $"{propName}.{attr.Key} = {attr.Value};").ToArray();
+
+            return CodeUtils.Lines(add, CodeUtils.Lines(attrs));
+        }
+
+        var props = components.Select(c => new PropertyCode { 
+            name = GeneratePropName(), 
+            accessibility = AccessibilityCode.Private, 
+            type = c.tagName,
+            value = "null",
+        }).ToArray();
+
+        var componentCodes = components.Select((c, i) => GenerateAddComponentCode(c, props[i].name)).ToArray();
+
+        return new ClassCode
+        {
+            name = name,
+            baseClassName = "MonoBehaviour",
+            accessibility = AccessibilityCode.Public,
+            properties = props,
+            methods = new MethodCode[]
+            {
+                new MethodCode
+                {
+                    name = "Awake",
+                    arguments = new ArgumentCode[]{},
+                    accessibility = AccessibilityCode.Public,
+                    returnType = "void",
+                    body = CodeUtils.Lines(componentCodes)
+                }
+            }
+        }.Generate();
+    }
 }
 
 public class Castle : MonoBehaviour
@@ -72,7 +205,8 @@ public class Castle : MonoBehaviour
         ";
 
         var tree = Parse(text);
-
+        var code = GenerateCode(tree);
+        Debug.Log(code.Generate());
     }
 
     private static Tree<Tag> Parse(string text)
@@ -86,34 +220,35 @@ public class Castle : MonoBehaviour
         };
     }
 
-    private static IComponentCode GenerateComponentCode(Tag tag, Tree<Tag>[] children)
+    private static PropertyCode GeneratePropertyCode(KeyValuePair<string, string> attribute)
     {
-        if (tag.tagName == "GameObject")
+        return new PropertyCode
         {
-
-        }
-
-        return new ComponentCode { 
-            className = tag.tagName,
-            properties = tag.attributes.ToList().Select(GeneratePropertyCode).ToArray()
+            name = attribute.Key,
+            value = attribute.Value,
+            accessibility = AccessibilityCode.Public
         };
     }
 
-    private static PropertyCode GeneratePropertyCode(KeyValuePair<string, string> attribute)
+    private static int generateClassCount;
+    private static string GenerateClassName()
     {
-        return attribute;
+        return $"__Class{generateClassCount++}";
     }
 
-    private static IComponentCode GenerateCode(Tree<Tag> tag)
+    private static CodeGeneratable GenerateCode(Tree<Tag> entry)
     {
-        var component = GenerateComponentCode(tag.element, tag.children);
+        var tag = entry.element;
 
-        if (component is ContainerCode container)
+        if (tag.tagName == "GameObject")
         {
-            container.children = tag.children.Select(GenerateCode).ToArray();
+            return new MonoBehaviourCode
+            {
+                name = GenerateClassName(),
+                components = entry.children.Select(c => c.element).ToArray()
+            };
         }
-
-        return component;
+        return null;
     }
 
     // Update is called once per frame
