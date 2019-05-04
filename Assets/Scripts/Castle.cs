@@ -18,7 +18,7 @@ public struct Tag
     public Dictionary<string, string> attributes;
 }
 
-public interface CodeGeneratable
+public interface ICodeGeneratable
 {
     string Generate();
 }
@@ -75,7 +75,7 @@ public static class CodeUtils
     }
 }
 
-public struct PropertyCode: CodeGeneratable
+public struct PropertyCode: ICodeGeneratable
 {
     public string name;
     public string type;
@@ -88,7 +88,7 @@ public struct PropertyCode: CodeGeneratable
     }
 }
 
-public struct ArgumentCode: CodeGeneratable
+public struct ArgumentCode: ICodeGeneratable
 {
     public string name;
     public string type;
@@ -100,7 +100,7 @@ public struct ArgumentCode: CodeGeneratable
     }
 }
 
-public struct MethodCode: CodeGeneratable
+public struct MethodCode: ICodeGeneratable
 {
     public string name;
     public string returnType;
@@ -118,7 +118,7 @@ public struct MethodCode: CodeGeneratable
     }
 }
 
-public struct ClassCode: CodeGeneratable
+public struct ClassCode: ICodeGeneratable
 {
     public string name;
     public string baseClassName;
@@ -138,7 +138,7 @@ public struct ClassCode: CodeGeneratable
     }
 }
 
-public struct MonoBehaviourCode : CodeGeneratable
+public struct MonoBehaviourCode : ICodeGeneratable
 {
     public string name;
     public Tag[] components;
@@ -239,7 +239,7 @@ public class Castle : MonoBehaviour
         return $"__Class{generateClassCount++}";
     }
 
-    private static CodeGeneratable GenerateCode(Tree<Tag> entry)
+    private static ICodeGeneratable GenerateCode(Tree<Tag> entry)
     {
         var tag = entry.element;
 
