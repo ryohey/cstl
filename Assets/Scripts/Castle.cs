@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using System.Xml;
+using System.IO;
 
 public struct Tree<T>
 {
@@ -192,18 +194,8 @@ public class Castle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var text = @"
-            <GameObject>
-                <Rigidbody />
-              <Transform localPosition=@position>
-                <GameObject>
-                    <MeshRenderer materials={[
-                        <Material color=@color />
-                    ]} />
-                </GameObject>
-            </GameObject>
-        ";
-
+        var filePath = Path.Combine(Application.streamingAssetsPath, "Components", "Example.cstl");
+        var text = File.ReadAllText(filePath);
         var tree = Parse(text);
         var code = GenerateCode(tree);
         Debug.Log(code.Generate());
@@ -211,12 +203,23 @@ public class Castle : MonoBehaviour
 
     private static Tree<Tag> Parse(string text)
     {
+        var doc = new XmlDocument();
+        doc.LoadXml(text);
+        return GenerateTagTree(doc.DocumentElement);
+    }
+
+    private static Tree<Tag> GenerateTagTree(XmlNode node)
+    {
+        var attributes = node.Attributes.Cast<XmlAttribute>()
+            .ToDictionary(attr => attr.Name, attr => attr.Value);
+
         return new Tree<Tag>
         {
-            element = new Tag { tagName = "GameObject" },
-            children = new Tree<Tag>[] { new Tree<Tag> {
-                element = new Tag { tagName = "Rigidbody", attributes = new Dictionary<string, string>() } }
-            }
+            element = new Tag { 
+                tagName = node.Name,
+                attributes = attributes
+            },
+            children = node.ChildNodes.Cast<XmlNode>().Select(GenerateTagTree).ToArray()
         };
     }
 
