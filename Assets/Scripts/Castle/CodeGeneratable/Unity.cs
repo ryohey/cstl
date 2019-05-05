@@ -18,7 +18,7 @@ namespace Castle
             string GenerateAddComponentCode(Tag tag, string propName)
             {
                 var get = $"{propName} = gameObject.GetComponent<{tag.tagName}>();";
-                var add = $"{propName} = {propName} ?? gameObject.AddComponent<{tag.tagName}>();";
+                var add = $"{propName} = {propName} != null ? {propName} : gameObject.AddComponent<{tag.tagName}>();";
                 var attrs = tag.attributes.Select(attr => $"{propName}.{attr.Key} = {attr.Value};").ToArray();
 
                 return CodeUtils.Lines(get, add, CodeUtils.Lines(attrs));

@@ -4,6 +4,13 @@ namespace Castle
 {
     public class MonoBehaviourCodeGenerator : IPartialCodeGenerator
     {
+        private readonly string className;
+
+        public MonoBehaviourCodeGenerator(string className)
+        {
+            this.className = className;
+        }
+
         public bool TestTagName(string tagName)
         {
             return tagName == "GameObject";
@@ -15,7 +22,7 @@ namespace Castle
 
             return new MonoBehaviourCode
             {
-                name = context.GetUniqueClassName(),
+                name = className,
                 components = entry.children.Select(c => c.element).ToArray()
             }.Generate();
         }

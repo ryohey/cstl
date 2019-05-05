@@ -9,19 +9,11 @@ namespace Castle
         ClassCode Generate(Tree<Tag> entry, CodeGeneratorContext context);
     }
 
-    public struct CodeGenResult
-    {
-        public string fileName;
-        public string code;
-    }
-
     public static class CodeGenerator
     {
-        public static CodeGenResult Generate(Tree<Tag> tree)
+        public static string Generate(Tree<Tag> tree, string className)
         {
-            var codeGen = new GroupCodeGenerator(new IPartialCodeGenerator[] { 
-                new MonoBehaviourCodeGenerator() 
-            });
+            var codeGen = new MonoBehaviourCodeGenerator(className);
             var context = new CodeGeneratorContext();
             var classCode = codeGen.Generate(tree, context);
 
@@ -32,11 +24,7 @@ namespace Castle
                 classes = new ClassCode[] { classCode }
             };
 
-            return new CodeGenResult
-            {
-                fileName = classCode.name,
-                code = sourceCode.Generate()
-            };
+            return sourceCode.Generate();
         }
     }
 

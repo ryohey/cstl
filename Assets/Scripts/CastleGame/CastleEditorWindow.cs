@@ -44,7 +44,7 @@ public class CastleEditorWindow : EditorWindow
             {
                 var text = File.ReadAllText(path);
                 var tree = Castle.Parser.Parse(text);
-                var result = Castle.CodeGenerator.Generate(tree);
+                var code = Castle.CodeGenerator.Generate(tree, Path.GetFileNameWithoutExtension(path));
                 var outputPath = Path.Combine(outputDir, Path.ChangeExtension(Path.GetFileName(path), "cs"));
                 File.WriteAllText(outputPath, code);
             }
