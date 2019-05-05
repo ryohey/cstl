@@ -9,9 +9,15 @@ namespace Castle
         ClassCode Generate(Tree<Tag> entry, CodeGeneratorContext context);
     }
 
+    public struct CodeGenResult
+    {
+        public string fileName;
+        public string code;
+    }
+
     public static class CodeGenerator
     {
-        public static ICodeGeneratable Generate(Tree<Tag> tree)
+        public static CodeGenResult Generate(Tree<Tag> tree)
         {
             var codeGen = new GroupCodeGenerator(new IPartialCodeGenerator[] { 
                 new MonoBehaviourCodeGenerator() 
@@ -26,7 +32,11 @@ namespace Castle
                 classes = new ClassCode[] { classCode }
             };
 
-            return sourceCode;
+            return new CodeGenResult
+            {
+                fileName = classCode.name,
+                code = sourceCode.Generate()
+            };
         }
     }
 

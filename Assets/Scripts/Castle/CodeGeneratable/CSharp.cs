@@ -26,7 +26,7 @@ namespace Castle
         }
     }
 
-    public struct PropertyCode : ICodeGeneratable
+    public struct PropertyCode
     {
         public string name;
         public string type;
@@ -39,7 +39,7 @@ namespace Castle
         }
     }
 
-    public struct ArgumentCode : ICodeGeneratable
+    public struct ArgumentCode
     {
         public string name;
         public string type;
@@ -51,7 +51,7 @@ namespace Castle
         }
     }
 
-    public struct MethodCode : ICodeGeneratable
+    public struct MethodCode
     {
         public string name;
         public string returnType;
@@ -69,7 +69,7 @@ namespace Castle
         }
     }
 
-    public struct ClassCode : ICodeGeneratable
+    public struct ClassCode
     {
         public string name;
         public string baseClassName;
@@ -89,7 +89,7 @@ namespace Castle
         }
     }
 
-    public struct SourceFileCode : ICodeGeneratable
+    public struct SourceFileCode
     {
         public string[] usingNames;
         public ClassCode[] classes;
