@@ -1,7 +1,7 @@
 <GameObject>
     <Rigidbody 
         mass="1"
-        isKinetic="true"
+        isKinematic="true"
     />
     <Transform 
         localPosition="new Vector3(1, 2, 3)" 

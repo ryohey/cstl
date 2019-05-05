@@ -88,4 +88,29 @@ namespace Castle
             );
         }
     }
+
+    public struct SourceFileCode : ICodeGeneratable
+    {
+        public string[] usingNames;
+        public ClassCode[] classes;
+        public string namespaceString;
+
+        public string Generate()
+        {
+            var usingString = CodeUtils.Lines(usingNames
+                .Distinct()
+                .OrderBy(name => name)
+                .Select(name => $"using {name};"
+            ).ToArray());
+
+            var classString = CodeUtils.Lines(2, classes.Select(c => c.Generate()).ToArray());
+
+            return CodeUtils.Lines(
+                usingString,
+                "",
+                $"namespace {namespaceString}",
+                CodeUtils.Block(classString)
+            );
+        }
+    }
 }

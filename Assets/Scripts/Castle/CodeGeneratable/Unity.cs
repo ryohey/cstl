@@ -2,12 +2,12 @@
 
 namespace Castle
 {
-    public struct MonoBehaviourCode : ICodeGeneratable
+    public struct MonoBehaviourCode
     {
         public string name;
         public Tag[] components;
 
-        public string Generate()
+        public ClassCode Generate()
         {
             int generatePropCount = 0;
             string GeneratePropName()
@@ -18,7 +18,7 @@ namespace Castle
             string GenerateAddComponentCode(Tag tag, string propName)
             {
                 var get = $"{propName} = gameObject.GetComponent<{tag.tagName}>();";
-                var add = $"{propName} = {propName} != null ? {propName} : gameObject.AddComponent<{tag.tagName}>();";
+                var add = $"{propName} = {propName} ?? gameObject.AddComponent<{tag.tagName}>();";
                 var attrs = tag.attributes.Select(attr => $"{propName}.{attr.Key} = {attr.Value};").ToArray();
 
                 return CodeUtils.Lines(get, add, CodeUtils.Lines(attrs));
@@ -42,16 +42,16 @@ namespace Castle
                 properties = props,
                 methods = new MethodCode[]
                 {
-                new MethodCode
-                {
-                    name = "Awake",
-                    arguments = new ArgumentCode[]{},
-                    accessibility = AccessibilityCode.Public,
-                    returnType = "void",
-                    body = CodeUtils.Lines(componentCodes)
+                    new MethodCode
+                    {
+                        name = "Awake",
+                        arguments = new ArgumentCode[]{},
+                        accessibility = AccessibilityCode.Public,
+                        returnType = "void",
+                        body = CodeUtils.Lines(componentCodes)
+                    }
                 }
-                }
-            }.Generate();
+            };
         }
     }
 }
