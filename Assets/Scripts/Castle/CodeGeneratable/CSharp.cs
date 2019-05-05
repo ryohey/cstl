@@ -55,15 +55,23 @@ namespace Castle
     {
         public string name;
         public string returnType;
+        public bool isOverride;
         public ArgumentCode[] arguments;
         public AccessibilityCode accessibility;
         public string body;
 
         public string Generate()
         {
+            var overrideString = isOverride ? "override" : null;
             var args = string.Join(", ", arguments.Select(arg => arg.Generate()));
             return CodeUtils.Lines(
-                $"{accessibility.Generate()} {returnType} {name}({args})",
+                string.Join(" ", new string[] {
+                    accessibility.Generate(),
+                    overrideString,
+                    returnType,
+                    name,
+                    $"({args})"
+                }),
                 CodeUtils.Block(body)
             );
         }
@@ -71,6 +79,7 @@ namespace Castle
 
     public struct ClassCode
     {
+        public string[] attributes;
         public string name;
         public string baseClassName;
         public AccessibilityCode accessibility;
@@ -79,10 +88,12 @@ namespace Castle
 
         public string Generate()
         {
+            var attributeString = CodeUtils.Lines(attributes.Select(attr => $"[{attr}]").ToArray());
             var propString = CodeUtils.Lines(properties.Select(prop => prop.Generate()).ToArray());
             var methodString = CodeUtils.Lines(methods.Select(method => method.Generate()).ToArray(), 2);
 
             return CodeUtils.Lines(
+                attributeString,
                 $"{accessibility.Generate()} class {name}: {baseClassName}",
                 CodeUtils.Block(CodeUtils.Lines(2, propString, methodString))
             );

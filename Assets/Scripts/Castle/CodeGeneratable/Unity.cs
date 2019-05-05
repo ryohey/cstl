@@ -37,18 +37,28 @@ namespace Castle
             return new ClassCode
             {
                 name = name,
-                baseClassName = "MonoBehaviour",
+                attributes = new string[] { "ExecuteAlways" },
+                baseClassName = "CastleMonoBehaviour",
                 accessibility = AccessibilityCode.Public,
                 properties = props,
                 methods = new MethodCode[]
                 {
                     new MethodCode
                     {
-                        name = "Awake",
+                        name = "SetupComponents",
+                        isOverride = true,
                         arguments = new ArgumentCode[]{},
                         accessibility = AccessibilityCode.Public,
                         returnType = "void",
-                        body = CodeUtils.Lines(componentCodes)
+                        body = CodeUtils.Lines(2, "RemoveAllComponents();", CodeUtils.Lines(componentCodes))
+                    },
+                    new MethodCode
+                    {
+                        name = "Awake",
+                        arguments = new ArgumentCode[]{ },
+                        accessibility = AccessibilityCode.Public,
+                        returnType = "void",
+                        body = "SetupComponents();"
                     }
                 }
             };

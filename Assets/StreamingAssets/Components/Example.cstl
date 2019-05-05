@@ -1,10 +1,10 @@
 <GameObject>
     <Rigidbody 
         mass="1"
-        isKinematic="true"
+        isKinematic="false"
     />
     <Transform 
-        localPosition="new Vector3(1, 2, 3)" 
+        localPosition="new Vector3(1, 222, 31)" 
         localScale="new Vector3(1, 1, 1)"
     />
 </GameObject>
