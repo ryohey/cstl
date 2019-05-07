@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Castle
 {
@@ -31,11 +32,43 @@ namespace Castle
         public string name;
         public string type;
         public string value;
+        public string getter;
+        public string setter;
+        public bool isOverride;
         public AccessibilityCode accessibility;
 
         public string Generate()
         {
-            return $"{accessibility.Generate()} {type} {name} = {value};";
+            var overrideString = isOverride ? "override" : null;
+            var arr = new List<string> { accessibility.Generate(), overrideString, type, name };
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                arr.Add("=");
+                arr.Add(value);
+            }
+
+            var body = string.Join(" ", arr.ToArray());
+
+            if (!string.IsNullOrEmpty(getter) || !string.IsNullOrEmpty(setter))
+            {
+                var blocks = new List<string>();
+                if (!string.IsNullOrEmpty(getter))
+                {
+                    blocks.Add(CodeUtils.Lines("get", CodeUtils.Block(getter)));
+                }
+                if (!string.IsNullOrEmpty(setter))
+                {
+                    blocks.Add(CodeUtils.Lines("set", CodeUtils.Block(setter)));
+                }
+                body = CodeUtils.Lines(body, CodeUtils.Block(CodeUtils.Lines(blocks.ToArray())));
+            }
+            else
+            {
+                body += ";";
+            }
+
+            return body;
         }
     }
 

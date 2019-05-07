@@ -1,10 +1,12 @@
 <GameObject>
     <Rigidbody 
         mass="1"
-        isKinematic="false"
+        drag="3"
+        isKinematic="true"
     />
     <Transform 
-        localPosition="new Vector3(1, 222, 31)" 
-        localScale="new Vector3(1, 1, 1)"
+        localPosition="new Vector3(1, 212, 31)" 
+        localScale="new Vector3(1, 21, 22)"
     />
+    <MeshRenderer />
 </GameObject>

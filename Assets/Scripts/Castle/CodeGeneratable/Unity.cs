@@ -5,6 +5,7 @@ namespace Castle
     public struct MonoBehaviourCode
     {
         public string name;
+        public string templatePath;
         public Tag[] components;
 
         public ClassCode Generate()
@@ -28,9 +29,17 @@ namespace Castle
             {
                 name = GeneratePropName(),
                 accessibility = AccessibilityCode.Private,
-                type = c.tagName,
-                value = "null",
-            }).ToArray();
+                type = c.tagName
+            }).ToList();
+
+            props.Add(new PropertyCode
+            {
+                name = "TemplatePath",
+                type = "string",
+                accessibility = AccessibilityCode.Public,
+                isOverride = true,
+                getter = $"return \"{templatePath}\";"
+            });
 
             var componentCodes = components.Select((c, i) => GenerateAddComponentCode(c, props[i].name)).ToArray();
 
@@ -40,7 +49,7 @@ namespace Castle
                 attributes = new string[] { "ExecuteAlways" },
                 baseClassName = "CastleMonoBehaviour",
                 accessibility = AccessibilityCode.Public,
-                properties = props,
+                properties = props.ToArray(),
                 methods = new MethodCode[]
                 {
                     new MethodCode
@@ -50,7 +59,7 @@ namespace Castle
                         arguments = new ArgumentCode[]{},
                         accessibility = AccessibilityCode.Public,
                         returnType = "void",
-                        body = CodeUtils.Lines(2, "RemoveAllComponents();", CodeUtils.Lines(componentCodes))
+                        body = CodeUtils.Lines(componentCodes)
                     },
                     new MethodCode
                     {

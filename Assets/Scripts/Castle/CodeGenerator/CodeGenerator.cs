@@ -11,9 +11,9 @@ namespace Castle
 
     public static class CodeGenerator
     {
-        public static string Generate(Tree<Tag> tree, string className)
+        public static string Generate(Tree<Tag> tree, string className, string filePath)
         {
-            var codeGen = new MonoBehaviourCodeGenerator(className);
+            var codeGen = new MonoBehaviourCodeGenerator(className, filePath);
             var context = new CodeGeneratorContext();
             var classCode = codeGen.Generate(tree, context);
 

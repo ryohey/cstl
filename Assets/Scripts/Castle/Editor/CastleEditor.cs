@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using CastleGenerated;
 
 namespace CastleEditor
 {
-    [CustomEditor(typeof(Transform))]
+    [CustomEditor(typeof(CastleMonoBehaviour))]
     public class CastleEditor : Editor
     {
         public override void OnInspectorGUI()

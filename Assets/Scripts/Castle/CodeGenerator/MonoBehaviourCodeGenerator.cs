@@ -5,10 +5,12 @@ namespace Castle
     public class MonoBehaviourCodeGenerator : IPartialCodeGenerator
     {
         private readonly string className;
+        private readonly string templatePath;
 
-        public MonoBehaviourCodeGenerator(string className)
+        public MonoBehaviourCodeGenerator(string className, string templatePath)
         {
             this.className = className;
+            this.templatePath = templatePath;
         }
 
         public bool TestTagName(string tagName)
@@ -23,6 +25,7 @@ namespace Castle
             return new MonoBehaviourCode
             {
                 name = className,
+                templatePath = templatePath,
                 components = entry.children.Select(c => c.element).ToArray()
             }.Generate();
         }
