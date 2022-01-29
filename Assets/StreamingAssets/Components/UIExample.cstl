@@ -1,0 +1,27 @@
+<GameObject name="UI Example">
+    <RectTransform />
+    <Canvas />
+    <GraphicRaycaster />
+    <CanvasScaler />
+    <GameObject name="Text Label">
+        <RectTransform />
+        <CanvasRenderer />
+        <Text text="Hello world!" />
+    </GameObject>
+    <GameObject name="Greetings">
+        <RectTransform />
+        <CanvasRenderer />
+        <Text text="Yes, another child!" />
+    </GameObject>
+    <GameObject name="Button">
+        <RectTransform sizeDelta="@(new Vector2(160, 30))" />
+        <CanvasRenderer />
+        <Image />
+        <Button />
+        <GameObject name="Label">
+            <RectTransform />
+            <CanvasRenderer />
+            <Text text="This is a button" />
+        </GameObject>
+    </GameObject>
+</GameObject>

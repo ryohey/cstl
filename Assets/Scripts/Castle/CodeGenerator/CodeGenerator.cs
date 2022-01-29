@@ -3,12 +3,6 @@ using System.Linq;
 
 namespace Castle
 {
-    public interface IPartialCodeGenerator
-    {
-        bool TestTagName(string tagName);
-        ClassCode Generate(Tree<Tag> entry, CodeGeneratorContext context);
-    }
-
     public static class CodeGenerator
     {
         public static string Generate(Tree<Tag> tree, string className, string filePath)
@@ -21,7 +15,7 @@ namespace Castle
             {
                 usingNames = context.usingNames.ToArray(),
                 namespaceString = "CastleGenerated",
-                classes = new ClassCode[] { classCode }
+                classes = new ClassCode[] { classCode.Generate() }
             };
 
             return sourceCode.Generate();

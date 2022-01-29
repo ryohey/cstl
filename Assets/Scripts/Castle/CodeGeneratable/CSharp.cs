@@ -118,17 +118,19 @@ namespace Castle
         public AccessibilityCode accessibility;
         public PropertyCode[] properties;
         public MethodCode[] methods;
+        public ClassCode[] classes;
 
         public string Generate()
         {
             var attributeString = CodeUtils.Lines(attributes.Select(attr => $"[{attr}]").ToArray());
             var propString = CodeUtils.Lines(properties.Select(prop => prop.Generate()).ToArray());
             var methodString = CodeUtils.Lines(methods.Select(method => method.Generate()).ToArray(), 2);
+            var classesString = CodeUtils.Lines(classes.Select(clazz => clazz.Generate()).ToArray(), 2);
 
             return CodeUtils.Lines(
                 attributeString,
                 $"{accessibility.Generate()} class {name}: {baseClassName}",
-                CodeUtils.Block(CodeUtils.Lines(2, propString, methodString))
+                CodeUtils.Block(CodeUtils.Lines(2, classesString, propString, methodString))
             );
         }
     }

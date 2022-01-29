@@ -1,10 +1,13 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CastleGenerated
 {
     [ExecuteAlways]
     public class Example: CastleMonoBehaviour
     {
+        
+        
         private  Rigidbody __Prop0;
         private  Transform __Prop1;
         private  MeshRenderer __Prop2;
